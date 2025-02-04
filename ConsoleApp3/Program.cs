@@ -1,4 +1,6 @@
-﻿class Program
+﻿using static Program;
+
+class Program
 {
     public class GameManager
     {
@@ -6,10 +8,18 @@
         private int flag; // current state;
         private bool somethingError = false;
         public int InputNum;
+        public List<Items> storeItem;
 
         public GameManager()
         {
             flag = -1;
+            storeItem = new List<Items>();
+            storeItem.Add(new Items("수련자 갑옷", 1000, "수련에 도움이 되는 갑옷입니다.", 2, 5));
+            storeItem.Add(new Items("무쇠갑옷", 2000, "무쇠로 만들어져 튼튼한 갑옷입니다.", 2, 9));
+            storeItem.Add(new Items("스파르타의 갑옷", 3500, "스파르타의 전사들이 사용했다는 전설의 갑옷입니다.", 2, 15));
+            storeItem.Add(new Items("낡은 검", 600, "쉽게 볼 수 있는 낡은 검 입니다.", 1, 2));
+            storeItem.Add(new Items("청동 도끼", 1500, "어디선가 사용됐던 거 같은 도끼입니다.", 1, 5));
+            storeItem.Add(new Items("스파르타의 창", 3000, "스파르타의 전사들이 사용했다는 전설의 창입니다.", 1, 7));
         }
 
         public void ShowDialog()
@@ -41,7 +51,7 @@
                     Console.WriteLine("인벤토리");
                     Console.WriteLine("보유 중인 아이템을 관리 할 수 있습니다.\n");
                     Console.WriteLine("[아이템 목록]");
-                    player.ShowItems();
+                    player.ShowItems(flag);
                     Console.WriteLine();
                     Console.WriteLine("1. 장착 관리");
                     Console.WriteLine("2. 나가기\n");
@@ -52,14 +62,29 @@
                     Console.WriteLine("[보유 골드]");
                     Console.WriteLine("{0} G\n", player.gold);
                     Console.WriteLine("[아이템 목록]");
-                    //show items
+                    
+                    foreach(Items item in storeItem)
+                    {
+                        item.ShowInfo();
+                    }
+
                     Console.WriteLine();
                     Console.WriteLine("1. 아이템 구매");
                     Console.WriteLine("0. 나가기\n");
                     break;
                 case 21: //from case 2
+                    Console.WriteLine("인벤토리 - 장착 관리");
+                    Console.WriteLine("보유 중인 아이템을 관리 할 수 있습니다.\n");
+                    Console.WriteLine("[아이템 목록]");
+                    player.ShowItems(flag);
+                    Console.WriteLine();
+                    
+                    Console.WriteLine("0. 나가기\n");
                     break;
                 case 31: //from case 3
+                    
+                default:
+                    Console.WriteLine("미구현입니다. 아무거나 입력하면 돌아갑니다.\n");
                     break;
             }
 
@@ -186,6 +211,44 @@
                     else
                         flag = 0;
                     break;
+                case 3:
+                    if (!int.TryParse(line, out InputNum) || !(InputNum == 1 || InputNum == 0))
+                    {
+                        somethingError = true;
+                        return;
+                    }
+
+                    if (InputNum == 1)
+                        flag = 31;
+                    else
+                        flag = 0;
+                    break;
+                case 21:
+                    if (!int.TryParse(line, out InputNum))
+                    {
+                        somethingError = true;
+                        return;
+                    }
+                    if (InputNum == 0)
+                    {
+                        flag = 0;
+                        break;
+                    }
+                    if(InputNum > player.items.Count || InputNum < 0)
+                    {
+                        somethingError = true;
+                        return;
+                    } else
+                    {
+                        player.EquipItem(InputNum - 1);
+                        return;
+                    }
+                    break;
+                case 31:
+                default:
+
+                    flag = 0;
+                    break;
             }
         }
     }
@@ -200,9 +263,9 @@
         public int gold = 1500;
         int job;
 
-        List<Items> items;
+        public List<Items> items;
         int addictionAttack = 0;
-        int addictionDefense = 2;
+        int addictionDefense = 0;
 
         public PlayerCharacter(string name, int job) 
         {
@@ -214,6 +277,7 @@
             this.name = name;
             this.job = job;
             items = new List<Items>();
+            items.Add(new Items("test", 100, "for test", 1, 3));
         }
 
         public void ShowInfo()
@@ -226,13 +290,43 @@
             Console.WriteLine("GOLD : {0}", gold);
         }
 
-        public void ShowItems()
+        public void ShowItems(int flag)
         {
+            int count = 1;
+            Console.Write(" -");
             foreach (Items item in items)
             {
-                Console.WriteLine(" -{0} {1}\t| {2} +{3}\t| {4}",item.isEquip?"[E]":"", item.name, (item.type == 1) ? "공격력" : "방어력", item.script);
+                if(flag == 21 || flag == 31)
+                {
+                    Console.Write(" ({0})", count++);
+                }
+                Console.Write(" {0}{1}\t| {2} +{3} | '{4}'\t ",item.isEquip?"[E]":"", item.name, (item.type == 1) ? "공격력" : "방어력", item.increaseValue, item.script);
+                if(flag == 3 || flag == 31)
+                {
+                    Console.Write("| {0} ", item.price);
+                }
+                Console.WriteLine();
             }
             Console.WriteLine();
+        }
+
+        public void EquipItem(int num)
+        {
+            items[num].isEquip = !items[num].isEquip;
+            if (items[num].isEquip)
+            {
+                if (items[num].type == 1)
+                    addictionAttack += items[num].increaseValue;
+                else
+                    addictionDefense += items[num].increaseValue;
+            } 
+            else
+            {
+                if (items[num].type == 1)
+                    addictionAttack -= items[num].increaseValue;
+                else
+                    addictionDefense -= items[num].increaseValue;
+            }
         }
     }
 
@@ -248,11 +342,17 @@
         public Items(string name, int price, string script, int type, int increaseValue)
         {
             isEquip = false;
-            name = this.name;
+            this.name = name;
             this.price = price;
             this.script = script;
             this.type = type;
             this.increaseValue = increaseValue;
+        }
+        public void ShowInfo()
+        {
+            
+            Console.WriteLine(" -{0} {1}\t| {2} +{3}\t| {4}\t| {5}G", isEquip ? "[E]" : "", name, (type == 1) ? "공격력" : "방어력", increaseValue, script, price);
+           
         }
     }
 
