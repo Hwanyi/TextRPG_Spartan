@@ -27,8 +27,17 @@
                     Console.WriteLine("1. 상태 보기");
                     Console.WriteLine("2. 인벤토리");
                     Console.WriteLine("3. 상점\n");
-                    Console.WriteLine("원하시는 행동을 입력해주세요.");
+                    Console.WriteLine("원하시는 행동을 입력해주세요.\n");
                     break;
+                case 1:
+                    Console.WriteLine("상태 보기");
+                    Console.WriteLine("캐릭터의 정보가 표시됩니다.\n");
+                    player.ShowInfo();
+                    Console.WriteLine();
+                    Console.WriteLine("0. 나가기\n");
+                    Console.WriteLine("원하시는 행동을 입력해주세요.\n");
+                    break;
+
             }
 
             if(somethingError)
@@ -37,7 +46,81 @@
                 somethingError = false;
             }
 
-            Console.Write(">>");
+            Console.Write(">> ");
+        }
+
+        private void MakeCharacter(string line)
+        {
+            string temp;
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine($"입력하신 이름은 {line} 입니다.\n");
+
+                Console.WriteLine("1. 저장");
+                Console.WriteLine("2. 취소\n");
+
+                if (somethingError)
+                {
+                    Console.WriteLine("잘못된 입력입니다.\n");
+                    somethingError = false;
+                }
+
+                Console.Write(">> ");
+                temp = Console.ReadLine();
+
+                if (!int.TryParse(temp, out InputNum))
+                {
+                    somethingError = true;
+                    continue;
+                }
+
+                if(InputNum == 1)
+                    break;
+                else if (InputNum == 2)
+                    return;
+                else 
+                    somethingError = true;
+                
+            }
+
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("직업을 선택해주세요\n");
+                Console.WriteLine("1. 전사");
+                Console.WriteLine("2. 도적\n");
+
+                if (somethingError)
+                {
+                    Console.WriteLine("잘못된 입력입니다.\n");
+                    somethingError = false;
+                }
+
+                Console.Write(">> ");
+
+                temp = Console.ReadLine();
+
+                if (!int.TryParse(temp, out InputNum))
+                {
+                    somethingError = true;
+                    continue;
+                }
+
+                if(InputNum == 1 || InputNum == 2)
+                {
+                    flag = 0;
+                    break;
+                }
+                else
+                {
+                    somethingError = true;
+                    continue;
+                }
+            }
+
+            player = new PlayerCharacter(line); //나중에 1, 2에 따라 직업 변경
+
         }
 
         public void DoAction(string line)
@@ -45,19 +128,28 @@
             switch (flag)
             {
                 case -1:
-                    player = new PlayerCharacter(line);
-                    flag = 0;
+                    MakeCharacter(line);
                     break;
                 case 0:
-                    if (!int.TryParse(line, out InputNum) || (InputNum > 3 || InputNum < 0))
+                    if (!int.TryParse(line, out InputNum) || (InputNum > 3 || InputNum < 1))
                     {
                         somethingError = true;
-                        break;
+                        return;
                     }
 
                     if(!somethingError)
                         flag = InputNum;
                     
+                    break;
+                case 1:
+                    if (!int.TryParse(line, out InputNum) || InputNum != 0)
+                    {
+                        somethingError = true;
+                        return;
+                    }
+
+                    if (!somethingError)
+                        flag = InputNum;
                     break;
             }
         }
@@ -67,9 +159,9 @@
     {
         int level = 1;
         string name = "";
-        float attack = 10f;
-        float defense = 5f;
-        float health = 100;
+        int attack = 10;
+        int defense = 5;
+        int health = 100;
         int gold = 1500;
 
         public PlayerCharacter(string name) 
@@ -84,7 +176,12 @@
 
         public void ShowInfo()
         {
-
+            Console.WriteLine("Lv : {0}", level);
+            Console.WriteLine("{0}", name);
+            Console.WriteLine("공격력 : {0}", attack);
+            Console.WriteLine("방어력 : {0}", defense);
+            Console.WriteLine("체 력 : {0}", health);
+            Console.WriteLine("GOLD : {0}", gold);
         }
     }
 
@@ -98,6 +195,8 @@
             gameManager.ShowDialog();
             
             line = Console.ReadLine();
+            Console.WriteLine();
+
             gameManager.DoAction(line);
             
         }
