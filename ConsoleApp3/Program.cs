@@ -20,6 +20,8 @@ class Program
             storeItem.Add(new Items("낡은 검", 600, "쉽게 볼 수 있는 낡은 검 입니다.", 1, 2));
             storeItem.Add(new Items("청동 도끼", 1500, "어디선가 사용됐던 거 같은 도끼입니다.", 1, 5));
             storeItem.Add(new Items("스파르타의 창", 3000, "스파르타의 전사들이 사용했다는 전설의 창입니다.", 1, 7));
+            storeItem.Add(new Items("우매함의 봉우리", 5000, "당신은 정말로 강해진 거 같지만 현실은 아닌 거 같습니다.", 1, 0));
+            storeItem.Add(new Items("붕권", 10000, "상대 명치가 오목해집니다.", 1, 55));
         }
 
         public void ShowDialog()
@@ -364,7 +366,7 @@ class Program
                     Console.Write(" ({0})", count++);
                 }
                 Console.Write(" {0}{1}\t| {2} +{3} | '{4}'\t ",item.isEquip?"[E]":"", item.name, (item.type == 1) ? "공격력" : "방어력", item.increaseValue, item.script);
-                if(flag == 3 || flag == 31)
+                if(flag == 3 || flag == 31 || flag == 32 || flag == 33 || flag == 34)
                 {
                     Console.Write("| {0} ", item.price);
                 }
