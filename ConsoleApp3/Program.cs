@@ -57,14 +57,16 @@ class Program
                     Console.WriteLine("2. 나가기\n");
                     break;
                 case 3:
-                    Console.WriteLine("장착 관리");
+                    Console.WriteLine("상점");
                     Console.WriteLine("필요한 아이템을 얻을 수 있는 상점입니다.\n");
                     Console.WriteLine("[보유 골드]");
                     Console.WriteLine("{0} G\n", player.gold);
                     Console.WriteLine("[아이템 목록]");
                     
+                    
                     foreach(Items item in storeItem)
                     {
+                        Console.Write(" -");
                         item.ShowInfo();
                     }
 
@@ -82,7 +84,26 @@ class Program
                     Console.WriteLine("0. 나가기\n");
                     break;
                 case 31: //from case 3
-                    
+                case 32:
+                case 33:
+                case 34:
+                    Console.WriteLine("상점 - 아이템 구매");
+                    Console.WriteLine("필요한 아이템을 얻을 수 있는 상점입니다.\n");
+                    Console.WriteLine("[보유 골드]");
+                    Console.WriteLine("{0} G\n", player.gold);
+                    Console.WriteLine("[아이템 목록]");
+
+                    int count = 1;
+                    foreach (Items item in storeItem)
+                    {
+                        Console.Write(" - ({0})",item.alreadyGet?"[구입완료]":count);
+                        count++;
+                        item.ShowInfo();
+                    }
+
+                    Console.WriteLine();
+                    Console.WriteLine("0. 나가기\n");
+                    break;
                 default:
                     Console.WriteLine("미구현입니다. 아무거나 입력하면 돌아갑니다.\n");
                     break;
@@ -92,6 +113,24 @@ class Program
             {
                 Console.WriteLine("잘못된 입력입니다.\n");
                 somethingError = false;
+            }
+
+            if(flag == 32)
+            {
+                Console.WriteLine("이미 구매한 아이템입니다.\n");
+                flag = 31;
+            }
+
+            if(flag == 33)
+            {
+                Console.WriteLine("구매를 완료했습니다.\n");
+                flag = 31;
+            }
+
+            if(flag == 34)
+            {
+                Console.WriteLine("Gold가 부족합니다.\n");
+                flag = 31;
             }
 
             Console.Write(">> ");
@@ -244,7 +283,32 @@ class Program
                         return;
                     }
                     break;
-                case 31:
+                case 31: //default store
+                case 32: //already get
+                case 33: //success buy
+                case 34: //no money
+                    if (!int.TryParse(line, out InputNum))
+                    {
+                        somethingError = true;
+                        return;
+                    }
+
+                    if (InputNum < 0 || InputNum > storeItem.Count)
+                    {
+                        somethingError = true;
+                        return;
+                    }
+
+                    if (InputNum == 0)
+                    {
+                        flag = 0;
+                        break;
+                    }
+
+                    player.BuyItems(storeItem[InputNum - 1], ref flag);
+                    
+
+                    break;
                 default:
 
                     flag = 0;
@@ -277,7 +341,6 @@ class Program
             this.name = name;
             this.job = job;
             items = new List<Items>();
-            items.Add(new Items("test", 100, "for test", 1, 3));
         }
 
         public void ShowInfo()
@@ -293,9 +356,9 @@ class Program
         public void ShowItems(int flag)
         {
             int count = 1;
-            Console.Write(" -");
             foreach (Items item in items)
             {
+                Console.Write(" -");
                 if(flag == 21 || flag == 31)
                 {
                     Console.Write(" ({0})", count++);
@@ -328,6 +391,26 @@ class Program
                     addictionDefense -= items[num].increaseValue;
             }
         }
+
+        public bool BuyItems(Items item, ref int flag)
+        {
+            if(item.alreadyGet)
+            {
+                flag = 32;
+                return false;
+            }
+            if(item.price > gold)
+            {
+                flag = 34;
+                return false;
+            }
+
+            items.Add(item);
+            gold -= item.price;
+            item.alreadyGet = true;
+            flag = 33;
+            return true;
+        }
     }
 
     public class Items
@@ -338,6 +421,7 @@ class Program
         public string script;
         public int type; //1. attack 2. defense
         public int increaseValue;
+        public bool alreadyGet;
 
         public Items(string name, int price, string script, int type, int increaseValue)
         {
@@ -347,11 +431,12 @@ class Program
             this.script = script;
             this.type = type;
             this.increaseValue = increaseValue;
+            alreadyGet = false;
         }
         public void ShowInfo()
         {
             
-            Console.WriteLine(" -{0} {1}\t| {2} +{3}\t| {4}\t| {5}G", isEquip ? "[E]" : "", name, (type == 1) ? "공격력" : "방어력", increaseValue, script, price);
+            Console.WriteLine(" {0}{1}\t| {2} +{3}\t| {4}\t| {5}G", isEquip ? "[E]" : "", name, (type == 1) ? "공격력" : "방어력", increaseValue, script, price);
            
         }
     }
