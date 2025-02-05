@@ -347,8 +347,8 @@ class Program
         {
             Console.WriteLine("Lv : {0}", level);
             Console.WriteLine("{0} ( {1} )", name, (job == 1)?"전사":"도적");
-            Console.WriteLine("공격력 : {0} {1}", attack, (addictionAttack > 0)?$"(+{addictionAttack})":"");
-            Console.WriteLine("방어력 : {0} {1}", defense, (addictionDefense > 0) ? $"(+{addictionDefense})" : "");
+            Console.WriteLine("공격력 : {0} {1}", attack + addictionAttack, (addictionAttack > 0)?$"(+{addictionAttack})":"");
+            Console.WriteLine("방어력 : {0} {1}", defense + addictionDefense, (addictionDefense > 0) ? $"(+{addictionDefense})" : "");
             Console.WriteLine("체 력 : {0}", health);
             Console.WriteLine("GOLD : {0}", gold);
         }
